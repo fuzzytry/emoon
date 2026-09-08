@@ -1,0 +1,12 @@
+# ---- Phase 1 (needed now) ----
+python-dotenv==1.0.1
+pyserial==3.5
+litellm==1.51.0
+
+# ---- Phase 2 (install when we build perception/TTS — not needed yet) ----
+# mediapipe
+# hsemotion-onnx
+# faster-whisper
+# silero-vad
+# librosa
+# kokoro

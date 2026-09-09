@@ -1,12 +1,16 @@
-# ---- Phase 1 (needed now) ----
+# ---- Phase 1 ----
 python-dotenv==1.0.1
 pyserial==3.5
 litellm==1.51.0
 
-# ---- Phase 2 (install when we build perception/TTS — not needed yet) ----
-# mediapipe
-# hsemotion-onnx
-# faster-whisper
-# silero-vad
-# librosa
-# kokoro
+# ---- Phase 2 (installing now) ----
+opencv-python==4.10.0.84
+mediapipe==0.10.14
+hsemotion-onnx==0.3.1
+onnxruntime==1.19.2
+faster-whisper==1.0.3
+silero-vad==5.1.2
+librosa==0.10.2
+sounddevice==0.5.0
+soundfile==0.12.1
+kokoro>=0.9.4

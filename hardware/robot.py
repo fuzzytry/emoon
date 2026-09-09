@@ -13,7 +13,7 @@ class Robot:
         self._link = connect(settings.serial_port, settings.serial_baud)
         self.connected = not isinstance(self._link, type(connect("", 0)))  # NullSerialLink check
 
-        def send(self, commands: list[RobotCommand]) -> None:
+    def send(self, commands: list[RobotCommand]) -> None:
         for cmd in commands:
             try:
                 envelope = validate(cmd)

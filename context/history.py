@@ -1,28 +1,33 @@
-"""Exponential moving average smoothing — prevents emotion state from
-flickering between values on noisy single-frame estimates."""
-from typing import Dict, Optional
+"""Conversation history tracking for EMU's context fusion engine."""
+from dataclasses import dataclass, field
+from typing import List, Optional
 from context.models import EmotionState
 
 
-class EMASmoother:
-    def __init__(self, alpha: float = 0.3):
-        """alpha closer to 1.0 = more responsive/less smooth.
-        0.3 is a reasonable starting point — tune once real camera noise
-        is observed in Phase 2, don't guess further than that now."""
-        self.alpha = alpha
-        self._scores: Dict[EmotionState, float] = {}
+@dataclass
+class HistoryEntry:
+    role: str  # "user" or "emu"
+    text: str
+    emotion: Optional[EmotionState] = None
 
-    def update(self, observed: EmotionState, observed_confidence: float) -> None:
-        for state in EmotionState:
-            prior = self._scores.get(state, 0.0)
-            target = observed_confidence if state == observed else 0.0
-            self._scores[state] = self.alpha * target + (1 - self.alpha) * prior
 
-    def dominant(self) -> tuple[EmotionState, float]:
-        if not self._scores:
-            return EmotionState.NEUTRAL, 0.0
-        state = max(self._scores, key=self._scores.get)
-        return state, self._scores[state]
+class ConversationHistory:
+    def __init__(self, max_history: int = 10):
+        self.max_history = max_history
+        self.entries: List[HistoryEntry] = []
 
-    def reset(self) -> None:
-        self._scores.clear()
+    def add(self, role: str, text: str, emotion: Optional[EmotionState] = None) -> None:
+        if not text:
+            return
+        self.entries.append(HistoryEntry(role=role, text=text, emotion=emotion))
+        if len(self.entries) > self.max_history:
+            self.entries.pop(0)
+
+    def recent_summary(self) -> str:
+        if not self.entries:
+            return "No previous interaction."
+        lines = []
+        for entry in self.entries[-5:]:
+            emotion_str = f" ({entry.emotion.value})" if entry.emotion else ""
+            lines.append(f"{entry.role.upper()}{emotion_str}: {entry.text}")
+        return " | ".join(lines)

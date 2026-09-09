@@ -7,7 +7,10 @@ from dataclasses import dataclass
 
 try:
     from dotenv import load_dotenv
-    load_dotenv()
+    if os.path.exists("config/.env"):
+        load_dotenv("config/.env", override=True)
+    else:
+        load_dotenv(override=True)
 except ImportError:
     pass  # python-dotenv optional; env vars can be set directly instead
 

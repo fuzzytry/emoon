@@ -1,0 +1,18 @@
+# Virtual Environments
+venv/
+env/
+.venv/
+
+# Environment Variables
+.env
+config/.env
+
+# Python Cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Downloaded Models
+perception/*.task
+*.onnx

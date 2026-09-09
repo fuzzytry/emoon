@@ -3,10 +3,7 @@ EMU entry point.
 
     python main.py --simulate                 # run all scripted scenarios
     python main.py --simulate --scenario PERSON_SAD
-
-Real camera/mic mode is NOT implemented yet (Phase 2) — running without
---simulate raises a clear error rather than pretending to process a live
-camera feed that doesn't exist in this build.
+    python main.py --live                     # run live perception mode
 """
 import argparse
 import logging
@@ -17,6 +14,7 @@ def main():
     parser = argparse.ArgumentParser(description="EMU — AI companion robot")
     parser.add_argument("--simulate", action="store_true", help="run in simulation mode (no hardware needed)")
     parser.add_argument("--scenario", type=str, default=None, help="run a single named scenario instead of all")
+    parser.add_argument("--live", action="store_true", help="run in live perception mode (camera + microphone)")
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(message)s")
@@ -28,17 +26,12 @@ def main():
             sim.robot.close()
         else:
             sim.run_all()
+    elif args.live:
+        from live_loop import run_live
+        run_live()
     else:
-        raise NotImplementedError(
-            "Live camera/mic perception is Phase 2 and isn't built yet in this "
-            "delivery. Run with --simulate to test the fusion/decision/expression "
-            "pipeline right now."
-        )
+        parser.print_help()
 
 
 if __name__ == "__main__":
     main()
-
-    else:
-        from live_loop import run_live
-        run_live()

@@ -38,3 +38,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+    else:
+        from live_loop import run_live
+        run_live()

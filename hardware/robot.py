@@ -13,12 +13,14 @@ class Robot:
         self._link = connect(settings.serial_port, settings.serial_baud)
         self.connected = not isinstance(self._link, type(connect("", 0)))  # NullSerialLink check
 
-    def send(self, commands: list[RobotCommand]) -> None:
+        def send(self, commands: list[RobotCommand]) -> None:
         for cmd in commands:
             try:
                 envelope = validate(cmd)
-                self._link.send(envelope.to_json_line())
-                logger.info("SENT: %s", envelope.to_json_line())
+                line = envelope.to_wire_line()
+                if line:
+                    self._link.send(line)
+                    logger.info("SENT: %s", line)
             except InvalidCommandError as e:
                 logger.error("REJECTED unsafe command %s: %s", cmd, e)
 

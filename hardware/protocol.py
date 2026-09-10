@@ -61,4 +61,8 @@ def validate(cmd: RobotCommand) -> CommandEnvelope:
             raise InvalidCommandError(f"channel {cmd.payload.get('channel')} out of range")
         if cmd.payload.get("deg") not in SERVO_DEG_RANGE:
             raise InvalidCommandError(f"deg {cmd.payload.get('deg')} out of range")
+              if cmd.type == "look":
+        px, py = cmd.payload.get("x"), cmd.payload.get("y")
+        if not (-1.0 <= px <= 1.0 and -1.0 <= py <= 1.0):
+            raise InvalidCommandError(f"look offset out of range: {px},{py}")
     return CommandEnvelope(type=cmd.type, payload=cmd.payload)

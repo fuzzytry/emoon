@@ -42,6 +42,8 @@ class CommandEnvelope:
             # matching servos[0]'s min/max in the firmware.
             deg = 90 + int(self.payload.get("target", 0))
             return f"SERVO 0 {deg}"
+        if self.type == "look":
+            return f"LOOK {int(self.payload['x']*100)} {int(self.payload['y']*100)}"
         if self.type == "system":
             return ""  # lighting-only commands: no Arduino equivalent yet
                        # (NeoPixel ring was dropped in the simplified build —

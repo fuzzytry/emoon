@@ -54,6 +54,14 @@ def run_live():
                 robot_connected=robot.connected,
             )
 
+            # Reflexive pupil tracking — independent of the decision engine,
+            # runs every frame a face is visible so the eyes feel alive even
+            # when nothing conversational is happening.
+            if vision_obs.face_detected and vision_obs.face_x is not None:
+                look_x = (vision_obs.face_x - 0.5) * 2   # -1..1, mirrored feel natural
+                look_y = (vision_obs.face_y - 0.5) * 2
+                robot.send([RobotCommand("look", {"x": round(look_x, 2), "y": round(look_y, 2)})])
+
             if semantic_obs and semantic_obs.text:
                 logger.info("HEARD: %r", semantic_obs.text)
                 if tts.is_speaking:

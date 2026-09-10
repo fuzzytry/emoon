@@ -11,7 +11,7 @@ from context.models import RobotCommand
 
 logger = logging.getLogger("emu.protocol")
 
-VALID_TYPES = {"expression", "gesture", "servo", "system", "head"}
+VALID_TYPES = {"expression", "gesture", "servo", "system", "head", "look"}
 VALID_EXPRESSIONS = {"NEUTRAL", "HAPPY", "CURIOUS", "SURPRISED", "SLEEPY",
                       "ALERT", "CONFUSED", "LISTENING", "PROCESSING", "PRIVACY", "CONCERNED"}
 VALID_GESTURES = {"WAVE", "NOD", "SHUFFLE", "GENTLE_ATTENTION"}

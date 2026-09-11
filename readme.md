@@ -1,29 +1,110 @@
-# EMU 🤖
-## Emotion-Aware AI Desk Companion
+# EMU V3
 
-EMU is a small AI desk companion combining computer vision, emotion recognition, speech, local AI and physical expression.
+### An expressive AI desk companion robot
 
-**PC = brain. Arduino = body.**
+EMU is a small, expressive desktop companion designed to combine **AI, computer vision, voice interaction, emotional expression, and physical movement** into a single character.
 
-### Current stack
-- Webcam + MediaPipe face tracking
-- HSEmotion facial emotion recognition
-- Silero VAD + faster-whisper STT
-- Ollama/LiteLLM decision layer
-- Kokoro TTS
-- USB serial to Arduino Uno
-- SSD1306 128x64 expressive OLED
-- Pupil tracking + animated mouth
-- Servo control + simulation mode
+The idea is simple:
 
-### Run
-```bash
-pip install -r requirements.txt
-python main.py --simulate
-python main.py --live
-```
+> **The computer is EMU's brain. The robot is EMU's body.**
 
-Set `config/.env` from `.env.example`; configure the Arduino COM port and Ollama model there.
+EMU does not try to be a humanoid robot. It is intentionally small, stationary, expressive, and personality-driven.
 
-### Serial protocol
-`EXPR`, `LOOK`, `MOUTH`, `SERVO`, `GESTURE` are intentionally flat text commands so the Uno stays lightweight.
+---
+
+## What is EMU?
+
+EMU is a purpose-built AI companion that can:
+
+- Listen to the user through a microphone
+- Convert speech to text
+- Analyze voice characteristics
+- Detect facial expressions and interaction context
+- Generate conversational responses using an LLM
+- Speak responses using text-to-speech
+- Animate an OLED face
+- Blink and move its pupils
+- Change expressions based on interaction
+- Move a servo for physical expression
+- Perform gestures and animations
+- Operate as a virtual desktop companion even without the physical robot
+
+The physical robot is controlled by an Arduino, while the heavy AI processing runs on the connected computer.
+
+---
+
+# Architecture
+
+```text
+                     ┌──────────────────────┐
+                     │       USER           │
+                     │  Voice / Face / PC   │
+                     └──────────┬───────────┘
+                                │
+                ┌───────────────┴───────────────┐
+                │                               │
+                ▼                               ▼
+        ┌───────────────┐               ┌───────────────┐
+        │  Microphone   │               │    Camera     │
+        └───────┬───────┘               └───────┬───────┘
+                │                               │
+                ▼                               ▼
+        ┌───────────────┐               ┌───────────────┐
+        │   Speech /    │               │ Vision /      │
+        │     STT       │               │ Emotion       │
+        └───────┬───────┘               └───────┬───────┘
+                │                               │
+                └───────────────┬───────────────┘
+                                ▼
+                       ┌─────────────────┐
+                       │ Context Fusion  │
+                       └────────┬────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   AI Decision   │
+                       │      / LLM      │
+                       └────────┬────────┘
+                                │
+                 ┌──────────────┴──────────────┐
+                 ▼                             ▼
+        ┌─────────────────┐           ┌─────────────────┐
+        │       TTS       │           │    Behavior     │
+        │  Kokoro / Audio │           │   Expression    │
+        └────────┬────────┘           └────────┬────────┘
+                 │                             │
+                 └──────────────┬──────────────┘
+                                ▼
+                       ┌─────────────────┐
+                       │    Arduino     │
+                       │   Body Control │
+                       └────────┬────────┘
+                                │
+                  ┌─────────────┴─────────────┐
+                  ▼                           ▼
+             ┌─────────┐                ┌──────────┐
+             │  OLED   │                │  Servo   │
+             │  Face   │                │ Movement │
+             └─────────┘                └──────────┘
+	  
+V3 Features
+Expressive OLED Face
+
+EMU V3 uses an OLED display to render a custom animated face.
+
+The face includes:
+
+Organic eyes
+Moving pupils
+Catchlights
+Eyelids
+Blinking
+Double blinking
+Blush
+Mouth animation
+Looking/searching behavior
+Processing animation
+Expression-specific eye shapes
+Small organic micro-movements
+
+The goal is to avoid the typical robotic, and instead make the face feel alive.

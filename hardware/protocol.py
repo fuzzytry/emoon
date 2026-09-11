@@ -1,22 +1,15 @@
-"""
-Command schema + validation, wire-compatible with the flat-token Arduino
-parser already built and tested in this project (EXPR/GESTURE/SERVO
-lines) — NOT nested JSON. This was corrected after checking against the
-actual firmware rather than inventing a new protocol Arduino can't read.
-"""
+"""Flat-token serial protocol shared by Python and the Arduino firmware."""
 import time
-import logging
 from dataclasses import dataclass, field
 from context.models import RobotCommand
 
-logger = logging.getLogger("emu.protocol")
-
-VALID_TYPES = {"expression", "gesture", "servo", "system", "head", "look"}
-VALID_EXPRESSIONS = {"NEUTRAL", "HAPPY", "CURIOUS", "SURPRISED", "SLEEPY",
-                      "ALERT", "CONFUSED", "LISTENING", "PROCESSING", "PRIVACY", "CONCERNED", "ANGRY"}
-VALID_GESTURES = {"WAVE", "NOD", "SHUFFLE", "GENTLE_ATTENTION"}
-SERVO_CHANNEL_RANGE = range(0, 5)
-SERVO_DEG_RANGE = range(0, 181)
+VALID_TYPES = {"expression", "gesture", "servo", "system", "head", "look", "mouth"}
+VALID_EXPRESSIONS = {
+    "NEUTRAL", "HAPPY", "SAD", "CURIOUS", "SURPRISED", "SLEEPY", "TIRED",
+    "ALERT", "CONFUSED", "ANXIOUS", "LISTENING", "PROCESSING", "EXCITED",
+    "EMBARRASSED", "PRIVACY", "CONCERNED", "ANGRY", "TALKING",
+}
+VALID_GESTURES = {"WAVE", "NOD", "SHUFFLE", "GENTLE_ATTENTION", "ACKNOWLEDGE"}
 
 
 class InvalidCommandError(ValueError):
@@ -30,41 +23,75 @@ class CommandEnvelope:
     payload: dict = field(default_factory=dict)
 
     def to_wire_line(self) -> str:
-        """Flat-token format matching the Arduino sketch's actual parser."""
         if self.type == "expression":
             return f"EXPR {self.payload['name']}"
         if self.type == "gesture":
-            return f"GESTURE {self.payload['name']}"
+            # Current Uno firmware has one physical head servo. Translate
+            # high-level gestures into firmware-native animations.
+            name = str(self.payload["name"]).upper()
+            if name in {"WAVE", "ACKNOWLEDGE"}:
+                return "ANIM WIGGLE"
+            if name == "NOD":
+                return "ANIM NOD"
+            if name == "GENTLE_ATTENTION":
+                return "ANIM SPARKLE"
+            if name == "SHUFFLE":
+                return "ANIM WIGGLE"
+            return ""
         if self.type == "servo":
-            return f"SERVO {self.payload['channel']} {self.payload['deg']}"
+            channel = int(self.payload["channel"])
+            deg = int(self.payload["deg"])
+            # V3 currently has only the head SG90 on channel 0.
+            if channel != 0:
+                return ""
+            return f"SERVO {deg}"
         if self.type == "head":
-            # Arduino head channel is 0; map ±30deg target to 60-120 range,
-            # matching servos[0]'s min/max in the firmware.
-            deg = 90 + int(self.payload.get("target", 0))
-            return f"SERVO 0 {deg}"
+            target = max(-30, min(30, int(self.payload.get("target", 0))))
+            return f"SERVO {90 + target}"
         if self.type == "look":
-            return f"LOOK {int(self.payload['x']*100)} {int(self.payload['y']*100)}"
-        if self.type == "system":
-            return ""  # lighting-only commands: no Arduino equivalent yet
-                       # (NeoPixel ring was dropped in the simplified build —
-                       # this is a silent no-op by design, not a bug)
-        return ""
+            x = max(-1.0, min(1.0, float(self.payload["x"])))
+            y = max(-1.0, min(1.0, float(self.payload["y"])))
+            return f"LOOK {round(x * 100):d} {round(y * 100):d}"
+        if self.type == "mouth":
+            return f"MOUTH {str(self.payload['state']).upper()}"
+        return ""  # system/lighting is intentionally local-only
 
 
 def validate(cmd: RobotCommand) -> CommandEnvelope:
     if cmd.type not in VALID_TYPES:
         raise InvalidCommandError(f"unknown command type: {cmd.type}")
-    if cmd.type == "expression" and cmd.payload.get("name") not in VALID_EXPRESSIONS:
-        raise InvalidCommandError(f"invalid expression: {cmd.payload.get('name')}")
-    if cmd.type == "gesture" and cmd.payload.get("name") not in VALID_GESTURES:
-        raise InvalidCommandError(f"invalid gesture: {cmd.payload.get('name')}")
-    if cmd.type == "servo":
-        if cmd.payload.get("channel") not in SERVO_CHANNEL_RANGE:
-            raise InvalidCommandError(f"channel {cmd.payload.get('channel')} out of range")
-        if cmd.payload.get("deg") not in SERVO_DEG_RANGE:
-            raise InvalidCommandError(f"deg {cmd.payload.get('deg')} out of range")
-              if cmd.type == "look":
-        px, py = cmd.payload.get("x"), cmd.payload.get("y")
-        if not (-1.0 <= px <= 1.0 and -1.0 <= py <= 1.0):
-            raise InvalidCommandError(f"look offset out of range: {px},{py}")
+
+    if cmd.type == "expression":
+        name = str(cmd.payload.get("name", ""))
+        if name not in VALID_EXPRESSIONS:
+            raise InvalidCommandError(f"invalid expression: {name}")
+
+    elif cmd.type == "gesture":
+        name = str(cmd.payload.get("name", ""))
+        if name not in VALID_GESTURES:
+            raise InvalidCommandError(f"invalid gesture: {name}")
+
+    elif cmd.type == "mouth":
+        state = str(cmd.payload.get("state", "")).upper()
+        if state not in {"TALK", "STOP"}:
+            raise InvalidCommandError(f"invalid mouth state: {state}")
+        cmd.payload["state"] = state
+
+    elif cmd.type == "servo":
+        channel = cmd.payload.get("channel")
+        deg = cmd.payload.get("deg")
+        if not isinstance(channel, int) or not 0 <= channel <= 4:
+            raise InvalidCommandError(f"invalid servo channel: {channel}")
+        if not isinstance(deg, int) or not 0 <= deg <= 180:
+            raise InvalidCommandError(f"invalid servo degrees: {deg}")
+
+    elif cmd.type == "look":
+        try:
+            x = float(cmd.payload["x"])
+            y = float(cmd.payload["y"])
+        except (KeyError, TypeError, ValueError) as exc:
+            raise InvalidCommandError("look requires numeric x and y") from exc
+        if not -1.0 <= x <= 1.0 or not -1.0 <= y <= 1.0:
+            raise InvalidCommandError(f"look offset out of range: {x},{y}")
+
     return CommandEnvelope(type=cmd.type, payload=cmd.payload)

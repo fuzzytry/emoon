@@ -1,32 +1,29 @@
-# EMUR 🤖
-
+# EMU 🤖
 ## Emotion-Aware AI Desk Companion
 
-**EMUR** is a small AI desk companion that combines **computer vision, emotion recognition, speech, local AI, and physical expression**.
+EMU is a small AI desk companion combining computer vision, emotion recognition, speech, local AI and physical expression.
 
-The goal:
+**PC = brain. Arduino = body.**
 
-> **Give an AI a face, a voice, and a body.**
+### Current stack
+- Webcam + MediaPipe face tracking
+- HSEmotion facial emotion recognition
+- Silero VAD + faster-whisper STT
+- Ollama/LiteLLM decision layer
+- Kokoro TTS
+- USB serial to Arduino Uno
+- SSD1306 128x64 expressive OLED
+- Pupil tracking + animated mouth
+- Servo control + simulation mode
 
-The **PC is the brain**. The **Arduino is the body**.
+### Run
+```bash
+pip install -r requirements.txt
+python main.py --simulate
+python main.py --live
+```
 
----
+Set `config/.env` from `.env.example`; configure the Arduino COM port and Ollama model there.
 
-## 🚀 What Works Right Now
-
-- ✅ **Webcam + face tracking**
-- ✅ **Facial emotion recognition** using MediaPipe + HSEmotion
-- ✅ **Microphone input**
-- ✅ **Voice activity detection** using Silero VAD
-- ✅ **Speech-to-text** using faster-whisper
-- ✅ **Live emotion + speech pipeline**
-- ✅ **Arduino USB serial communication**
-- ✅ **SSD1306 OLED face**
-- ✅ **Pupil tracking**
-- ✅ **Servo control**
-- ✅ **Simulation mode**
-- 🔄 **Ollama + Llama 3.2 integration**
-- 🔄 **TTS / voice output**
-- 🔄 **Advanced animated expressions**
-
-The live prototype can already **see, listen, recognize emotion, understand speech, make decisions, and control the physical EMUR.**
+### Serial protocol
+`EXPR`, `LOOK`, `MOUTH`, `SERVO`, `GESTURE` are intentionally flat text commands so the Uno stays lightweight.

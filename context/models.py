@@ -8,19 +8,19 @@ from typing import Optional
 import time
 
 
-class EmotionState(str, Enum):
+class ExpressionType(str, Enum):
     NEUTRAL = "NEUTRAL"
     HAPPY = "HAPPY"
-    SAD = "SAD"
-    EXCITED = "EXCITED"
-    TIRED = "TIRED"
-    ANGRY = "ANGRY"
+    CURIOUS = "CURIOUS"
     SURPRISED = "SURPRISED"
+    SLEEPY = "SLEEPY"
+    ALERT = "ALERT"
     CONFUSED = "CONFUSED"
-    STRESSED = "STRESSED"
-    ANXIOUS = "ANXIOUS"
-    FOCUSED = "FOCUSED"
-    BORED = "BORED"
+    LISTENING = "LISTENING"
+    PROCESSING = "PROCESSING"
+    PRIVACY = "PRIVACY"
+    CONCERNED = "CONCERNED"
+    ANGRY = "ANGRY"   # add this
 
 
 class InteractionState(str, Enum):

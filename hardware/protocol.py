@@ -13,7 +13,7 @@ logger = logging.getLogger("emu.protocol")
 
 VALID_TYPES = {"expression", "gesture", "servo", "system", "head", "look"}
 VALID_EXPRESSIONS = {"NEUTRAL", "HAPPY", "CURIOUS", "SURPRISED", "SLEEPY",
-                      "ALERT", "CONFUSED", "LISTENING", "PROCESSING", "PRIVACY", "CONCERNED"}
+                      "ALERT", "CONFUSED", "LISTENING", "PROCESSING", "PRIVACY", "CONCERNED", "ANGRY"}
 VALID_GESTURES = {"WAVE", "NOD", "SHUFFLE", "GENTLE_ATTENTION"}
 SERVO_CHANNEL_RANGE = range(0, 5)
 SERVO_DEG_RANGE = range(0, 181)

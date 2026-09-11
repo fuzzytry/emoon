@@ -1,10 +1,3 @@
-"""
-Live mode: opens the webcam analytics window (per your request — face box,
-per-emotion percentage bars), listens on the mic, and drives the full
-fusion -> decision -> expression -> robot+TTS pipeline in real time.
-
-Press 'q' in the camera window to quit.
-"""
 import logging
 import cv2
 
